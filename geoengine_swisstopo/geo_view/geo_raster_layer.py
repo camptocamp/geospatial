@@ -5,8 +5,8 @@ from odoo import api, fields, models
 
 
 BASE_URL = (
-    "https://wmts{{0-9}}.geo.admin.ch/1.0.0/{layername}/default/"
-    "{time}/{matrix_set}/{{TileSetId}}/{{TileRow}}/{{TileCol}}.{ext}"
+    "https://wmts.geo.admin.ch/1.0.0/{layername}/default/"
+    "{time}/{matrix_set}/{{TileMatrix}}/{{TileCol}}/{{TileRow}}.{ext}"
 )
 
 
