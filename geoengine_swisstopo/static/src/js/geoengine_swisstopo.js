@@ -1,60 +1,6 @@
-/**
- * Available resolutions as defined in
- * https://api3.geo.admin.ch/services/sdiservices.html#wmts.
- * @const {!Array.<number>}
- */
-const RESOLUTIONS = {
-    "EPSG:21781": [
-        4000, 3750, 3500, 3250, 3000, 2750, 2500, 2250, 2000, 1750, 1500, 1250,
-        1000, 750, 650, 500, 250, 100, 50, 20, 10, 5, 2.5, 2, 1.5, 1, 0.5, 0.25,
-        0.1,
-    ],
-    "EPSG:2056": [
-        4000, 3750, 3500, 3250, 3000, 2750, 2500, 2250, 2000, 1750, 1500, 1250,
-        1000, 750, 650, 500, 250, 100, 50, 20, 10, 5, 2.5, 2, 1.5, 1, 0.5, 0.25,
-        0.1,
-    ],
-    "EPSG:4326": [
-        0.703125, 0.3515625, 0.17578125, 0.087890625, 0.0439453125,
-        0.02197265625, 0.010986328125, 0.0054931640625, 0.00274658203125,
-        0.001373291015625, 0.0006866455078125, 0.00034332275390625,
-        0.000171661376953125, 0.0000858306884765625, 0.00004291534423828125,
-        0.000021457672119140625, 0.000010728836059570312,
-        0.000005364418029785156, 0.000002682209014892578,
-    ],
-    "EPSG:3857": [
-        4000, 3750, 3500, 3250, 3000, 2750, 2500, 2250, 2000, 1750, 1500, 1250,
-        1000, 750, 650, 500, 250, 100, 50, 20, 10, 5, 2.5, 2, 1.5, 1, 0.5, 0.25,
-        0.1,
-    ],
-};
-
 const ATTRIBUTIONS =
     '<a target="_blank" href="https://www.swisstopo.admin.ch">swisstopo</a>';
 
-/**
- * Extents of Swiss projections. (EPSG:21781)
- */
-const EXTENTS = {
-    "EPSG:21781": [420000, 30000, 900000, 350000],
-    "EPSG:2056": [2420000, 1030000, 2900000, 1350000],
-    "EPSG:4326": [90, -180, -90, 180],
-    //"EPSG:4326": [5.140242, 45.398181, 11.47757, 48.230651],
-    "EPSG:3857": [
-        20037508.342789244, -20037508.342789244, -20037508.342789244,
-        20037508.342789244,
-    ],
-};
-const EXTENTS_2 = {
-    "EPSG:21781": [420000, 30000, 900000, 350000],
-    "EPSG:2056": [2420000, 1030000, 2900000, 1350000],
-    //"EPSG:4326": [90, -180, -90, 180],
-    "EPSG:4326": [5.140242, 45.398181, 11.47757, 48.230651],
-    "EPSG:3857": [
-        20037508.342789244, -20037508.342789244, -20037508.342789244,
-        20037508.342789244,
-    ],
-};
 const PROJECTION_DEFINITIONS = {
     "EPSG:21781": [
         "+proj=somerc",
@@ -119,7 +65,7 @@ function define_projections() {
         }
     }
 
-    ol.proj.proj4.register(proj4);
+    //ol.proj.proj4.register(proj4);
 }
 
 odoo.define("geoengine_swisstopo.projection_EPSG_4326", function (require) {
@@ -208,35 +154,36 @@ odoo.define('geoengine_swisstopo.BackgroundLayers', function (require) {
             if (l.raster_type == "swisstopo") {
                 let format = l.format_suffix || "jpeg";
                 let projection_code = l.projection || DEFAULT_PROJECTION_CODE;
-                let projection = ol.proj.get(projection_code);
-                let source = new ol.source.WMTS({
-                    extent: EXTENTS_2[projection_code],
-                    attributions: [
-                        new ol.Attribution({
-                            html: ATTRIBUTIONS,
-                        })
-                    ],
-                    url: l.wmts_url,
-                    //urls: Array [ "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/{Time}/4326/{TileMatrix}/{TileCol}/{TileRow}.jpeg" ]
-                    // https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/4326/10/243/1077.jpeg
-                    projection: projection,
-                    requestEncoding: "REST",
-                    version: "1.0.0",
-                    //style: "default",​
-                    style: "ch.swisstopo.pixelkarte-farbe",
-                    layer: "ch.swisstopo.pixelkarte-farbe",
-                    matrixSet: "4326_18",
-                    format: "image/" + format,
-                    tileGrid: this.createTileGrid(projection_code),
-                    crossOrigin: "anonymous",
-                });
+                let options = ol.source.WMTS.optionsFromCapabilities(
+                    new ol.format.WMTSCapabilities().read(l.capabilities),
+                    {
+                        crossOrigin: "anonymous",
+                        layer: l.layername,
+                        projection: projection_code,
+                        format: `image/${format}`,
+                    },
+                );
+                if (!options) {
+                    console.error("the layer is not in the capabilities");
+                    return out;
+                }
+                if (l.time && options.dimensions.Time) {
+                    options.dimensions.Time = l.time;
+                }
+                options.attributions = [
+                    new ol.Attribution({
+                        html: ATTRIBUTIONS,
+                    }),
+                ];
+
+                let source = new ol.source.WMTS(options);
                 out.push(
                     new ol.layer.Tile({
                         title: l.name,
                         visible: !l.overlay,
                         type: "base",
                         source: source,
-                    })
+                    }),
                 );
             }
             return out;
