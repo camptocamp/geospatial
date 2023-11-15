@@ -124,6 +124,60 @@ odoo.define("geoengine_swisstopo.projection_EPSG_21781", function (require) {
 
     });
 });
+odoo.define("geoengine_swisstopo.projection_EPSG_2056", function (require) {
+    "use strict";
+
+    let GeoengineWidgets = require("base_geoengine.geoengine_widgets");
+    let GeoengineView = require("base_geoengine.GeoengineView");
+
+    GeoengineWidgets.FieldGeoEngineEditMap.include({
+        init: function (parent) {
+            this._super.apply(this, arguments);
+            init_proj4(this);
+        },
+        _render: function (parent) {
+            define_projections();
+            this._super.apply(this, arguments);
+        },
+    });
+    GeoengineView.include({
+        init: function (parent) {
+            this._super.apply(this, arguments);
+            init_proj4(this);
+        },
+        _render: function (parent) {
+            define_projections();
+            this._super.apply(this, arguments);
+        },
+    });
+});
+odoo.define("geoengine_swisstopo.projection_EPSG_3857", function (require) {
+    "use strict";
+
+    let GeoengineWidgets = require("base_geoengine.geoengine_widgets");
+    let GeoengineView = require("base_geoengine.GeoengineView");
+
+    GeoengineWidgets.FieldGeoEngineEditMap.include({
+        init: function (parent) {
+            this._super.apply(this, arguments);
+            init_proj4(this);
+        },
+        _render: function (parent) {
+            define_projections();
+            this._super.apply(this, arguments);
+        },
+    });
+    GeoengineView.include({
+        init: function (parent) {
+            this._super.apply(this, arguments);
+            init_proj4(this);
+        },
+        _render: function (parent) {
+            define_projections();
+            this._super.apply(this, arguments);
+        },
+    });
+});
 
 
 odoo.define('geoengine_swisstopo.BackgroundLayers', function (require) {
