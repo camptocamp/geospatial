@@ -1,7 +1,15 @@
 # Copyright 2019 Camptocamp SA
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from odoo import fields, models
+import logging
+
+import requests
+from odoo import api, fields, models
+
+_LOGGER = logging.getLogger(__name__)
+_CAPABILITIES_URL = (
+    "https://wmts.geo.admin.ch/EPSG/{matrix_set}/1.0.0/WMTSCapabilities.xml"
+)
 
 
 class GeoRasterLayer(models.Model):
