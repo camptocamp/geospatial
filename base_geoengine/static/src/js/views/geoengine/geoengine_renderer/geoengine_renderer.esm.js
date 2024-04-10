@@ -164,13 +164,21 @@ export class GeoengineRenderer extends Component {
         const source = [];
         source.push(new ol.layer.Tile({source: new ol.source.OSM()}));
         const backgroundLayers = backgrounds.map((background) => {
+            var urls = [];
             switch (background.raster_type) {
                 case "osm":
+                    var osmOptions = {};
+                    if (background.url) {
+                        urls = background.url.split(",");
+                        if (urls.length > 0) {
+                            osmOptions.url = urls[0];
+                        }
+                    }
                     return new ol.layer.Tile({
                         title: background.name,
                         visible: !background.overlay,
                         type: "base",
-                        source: new ol.source.OSM(),
+                        source: new ol.source.OSM(osmOptions),
                     });
                 case "wmts":
                     const {source_opt, tilegrid_opt, layer_opt} =
@@ -217,7 +225,7 @@ export class GeoengineRenderer extends Component {
                         params: JSON.parse(background.params_wms),
                         serverType: background.server_type,
                     };
-                    const urls = background.url.split(",");
+                    urls = background.url.split(",");
                     if (urls.length > 1) {
                         source_opt_wms.urls = urls;
                     } else {
@@ -596,7 +604,7 @@ export class GeoengineRenderer extends Component {
             .getSource()
             .getExtent();
         var infinite_extent = [Infinity, Infinity, -Infinity, -Infinity];
-        if (extent !== infinite_extent) {
+        if (JSON.stringify(extent) !== JSON.stringify(infinite_extent)) {
             var map_view = this.map.getView();
             if (map_view) {
                 map_view.fit(extent, {maxZoom: 15});

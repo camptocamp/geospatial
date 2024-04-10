@@ -1,51 +1,85 @@
-# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
-from odoo import http, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
+import logging 
+import json
+
+_logger = logging.getLogger(__name__)
 
 
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+    opening_hours = fields.Char(string="Opening hours")
 
-    @http.route(['/geodatas/res_partner/stores'], type='json', auth="user",  website=True, cors='*', crsf=False)
-    def fetchGeoData(self):
+    AUTHORIZED_FIELDS = ["name", "city", "zip", "street", "street2", "tag"]
 
-        return """  {
-            "type": "FeatureCollection",
-            "features": [
-                {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [102.0, 0.5]
-                },
-                "properties": {
-                    "id": 1,
-                    "name": "Stéphane Bruner",
-                    "zip": "5000", 
-                    "city": "Lausanne",  
-                    "street": "Rue de Busigny 28",  
-                    "street2": "",  
-                    "tags": "big,blue,dev",
-                    "openning_hours": "Mo-Fr 08:00-12:00,13:00-17:00"
-                    }
-                },
-                {
-                "type": "Feature",
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [142.0, 0.5]
-                },
-                "properties": {
-                    "id": 2,
-                    "name": "Hadrien Huvelle",
-                    "zip": "5000",  
-                    "city": "Namur",    
-                    "street": "Rue Denis-Georges Bayar 58",   
-                    "street2": "RDC",   
-                    "tags": "small,red,archi",
-                    "openning_hours": "Mo-Fr 09:00-12:00,13:00-18:00"       
-                }
-            ]
-            }
+    @api.model
+    def get_search_tags(self, search, lang):
+        _logger.info(f"get_search_tags: {search}")
+        _logger.info(f"get_search_tags: {lang}")
+        #TODO FILTER res_partner on is_store = True AND is_published = True AND website_published = True. And filter category_ids on partners as well
+        sql = f"""
+        WITH
+            names as (SELECT DISTINCT 'name' as column, name as value FROM res_partner WHERE type='store'),
+            cities as (SELECT DISTINCT 'city' as column, city as value FROM res_partner WHERE type='store'),
+            zips as (SELECT DISTINCT 'zip' as column, zip as value FROM res_partner WHERE type='store'),
+            streets as (SELECT DISTINCT 'street' as column, concat(street, street2) as value FROM res_partner WHERE type='store'),
+            tags as (
+                SELECT DISTINCT 
+                    'tag' as column, 
+                    res_partner_category.name->>'{lang}' as value 
+                FROM 
+                    res_partner_category, 
+                    res_partner_res_partner_category_rel, 
+                    res_partner 
+                WHERE 
+                    res_partner_res_partner_category_rel.partner_id = res_partner.id 
+                    AND 
+                    res_partner_res_partner_category_rel.category_id = res_partner_category.id 
+                    AND res_partner.type='store'
+            ),
+            all_tags as (SELECT * FROM names UNION SELECT * FROM cities UNION SELECT * FROM zips UNION SELECT * FROM streets UNION SELECT * FROM tags )
+
+        
+        SELECT * FROM all_tags WHERE value ILIKE '%{search}%';
         """
-            
+        self._cr.execute(sql)
+        return self._cr.fetchall()
+
+    @api.model
+    def fetch_partner_geoengine(self, tags, lang):
+        _logger.info(f"fetch_partner_geoengine: {tags}")
+        _logger.info(f"fetch_partner_geoengine: {lang}")
+
+        #todo base domaine: is_store
+        domain = [("type", "=", "store")]
+        domain = []
+        for tag in tags:
+            field, value = tag.values()
+            _logger.info(f"fetch_partner_geoengine: {field}: {value}")
+            if field not in self.AUTHORIZED_FIELDS:
+                raise ValidationError(_("Unauthorized field"))
+            domain.append((field.replace('tag', 'category_id.name'), "ilike", value))
+        
+        partners = self.sudo().search(domain)
+        features = []
+
+        for partner in partners:
+            features.append(
+                {
+                    "type": "Feature",
+                    "geometry": {"type": "Point", "coordinates": [partner.partner_longitude, partner.partner_latitude]},
+                    "properties": {
+                        "id": partner.id or None,
+                        "name": partner.name or '',
+                        "zip": partner.zip or '',
+                        "city": partner.city or '',
+                        "street": partner.street or '',
+                        "street2": partner.street2 or '',
+                        "tags": partner.category_id.mapped('name') or '',
+                        
+                        "opening_hours": partner.opening_hours or '',
+                    },
+                }
+            )
+        return features

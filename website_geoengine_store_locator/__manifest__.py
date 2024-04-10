@@ -8,22 +8,25 @@
     "author": "Camptocamp, Odoo Community Association (OCA)",
     "license": "AGPL-3",
     "website": "https://github.com/OCA/geospatial",
-    "depends": ["base_geoengine", "website", "partner_store"],
+    "depends": ["base_geoengine", "website", "partner_store", 'website_geoengine'],
     "data": [
-        'templates/snippets/s_openstreetmap.xml',
-        'views/snippets.xml',
+        "templates/snippets/s_openlayer_store_locator.xml",
+        "views/snippets.xml",
     ],
-    'assets': {
-        'web.assets_frontend': [
-            'website_geoengine_store_locator/static/src/scss/snippets/s_openstreetmap/frontend.scss',
-            'website_geoengine_store_locator/static/src/js/utils.js',
-            'website_geoengine_store_locator/static/src/js/snippets/s_openstreetmap/frontend.js',
+    "assets": {
+        "web.assets_frontend": [
+            "website_geoengine_store_locator/static/lib/node_modules/ol/dist/ol.js",
+            "website_geoengine_store_locator/static/lib/node_modules/jquery-flexdatalist/jquery.flexdatalist.js",
+            "website_geoengine_store_locator/static/src/scss/snippets/s_openlayer_store_locator/frontend.scss",
+            "website_geoengine_store_locator/static/src/js/snippets/s_openlayer_store_locator/frontend.js",
+            "website_geoengine_store_locator/static/src/js/snippets/s_openlayer_store_locator/popover.js",
+            "website_geoengine_store_locator/static/src/js/snippets/s_openlayer_store_locator/search.js",
+            "website_geoengine_store_locator/static/src/js/snippets/s_openlayer_store_locator/map.js",
+            "/web/static/lib/stacktracejs/stacktrace.js",
         ],
-        'website.assets_wysiwyg': [
-            ('include', 'web._assets_helpers'),
-            'website_geoengine_store_locator/static/src/js/snippets/s_openstreetmap/snippet.options.js',
-            
-        ]
+        "website.assets_wysiwyg": [
+            "website_geoengine_store_locator/static/src/js/snippets/s_openlayer_store_locator/snippet.options.js",
+        ],
     },
     "maintainers": ["Wouitmil"],
     "installable": True,
