@@ -15,19 +15,23 @@ class ResPartner(models.Model):
 
     @api.model
     def get_search_tags(self, search, lang):
-        _logger.info(f"get_search_tags: {search}")
-        _logger.info(f"get_search_tags: {lang}")
-        # TODO FILTER res_partner on is_store = True AND is_published = True AND website_published = True. And filter category_ids on partners as well
-        sql = f"""
+        sql = """
         WITH
-            names as (SELECT DISTINCT 'name' as column, name as value FROM res_partner WHERE type='store'),
-            cities as (SELECT DISTINCT 'city' as column, city as value FROM res_partner WHERE type='store'),
-            zips as (SELECT DISTINCT 'zip' as column, zip as value FROM res_partner WHERE type='store'),
-            streets as (SELECT DISTINCT 'street' as column, concat(street, street2) as value FROM res_partner WHERE type='store'),
-            tags as (
-                SELECT DISTINCT
-                    'tag' as column,
-                    res_partner_category.name->>'{lang}' as value
+            names as (
+                SELECT
+                    DISTINCT 'name' as column,
+                    name as value
+                FROM
+                    res_partner
+                WHERE
+                    type='store'),
+            cities as (
+                SELECT
+                    DISTINCT 'city' as column,
+                    city as value
+                SELECT
+                    DISTINCT 'tag' as column,
+                    res_partner_category.name->>'%s' as value
                 FROM
                     res_partner_category,
                     res_partner_res_partner_category_rel,
@@ -38,12 +42,17 @@ class ResPartner(models.Model):
                     res_partner_res_partner_category_rel.category_id = res_partner_category.id
                     AND res_partner.type='store'
             ),
-            all_tags as (SELECT * FROM names UNION SELECT * FROM cities UNION SELECT * FROM zips UNION SELECT * FROM streets UNION SELECT * FROM tags )
+            all_tags as (
+                SELECT * FROM names
+                UNION SELECT * FROM cities
+                UNION SELECT * FROM zips
+                UNION SELECT * FROM streets
+                UNION SELECT * FROM tags )
 
 
-        SELECT * FROM all_tags WHERE value ILIKE '%{search}%';
+        SELECT * FROM all_tags WHERE value ILIKE '%s';
         """
-        self._cr.execute(sql)
+        self._cr.execute(sql, (lang, "".joint("%", search, "%")))
         return self._cr.fetchall()
 
     @api.model

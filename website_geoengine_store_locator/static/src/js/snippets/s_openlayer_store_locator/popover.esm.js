@@ -5,25 +5,30 @@ class Popover {
      * The base element
      * @param {HTMLElement} element
      */
+    // eslint-disable-next-line no-undef
     element = undefined;
     /**
      * The jQuery base element
      */
+    // eslint-disable-next-line no-undef
     jqueryElement = undefined;
     /**
      * The map
      * @param {ol.Map} map
      */
+    // eslint-disable-next-line no-undef
     map = undefined;
     /**
      * The popup overlay
      * @param {ol.Overlay} popup
      */
+    // eslint-disable-next-line no-undef
     popup = undefined;
     /**
      * The popover
      * @param {jQuery} popover
      */
+    // eslint-disable-next-line no-undef
     popover = undefined;
 
     constructor(element, map) {

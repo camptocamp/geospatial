@@ -1,10 +1,7 @@
 /** @odoo-module **/
 
-import publicWidget from "web.public.widget";
 import OpenLayerMap from "./map";
-import rpc from "web.rpc";
-import {useService} from "@web/core/utils/hooks";
-const {useState} = owl;
+import publicWidget from "web.public.widget";
 
 publicWidget.registry.OpenLayerStoreLocator = publicWidget.Widget.extend({
     selector: ".s_openlayer_store_locator",
@@ -18,11 +15,6 @@ publicWidget.registry.OpenLayerStoreLocator = publicWidget.Widget.extend({
      * @override
      */
     start() {
-        const lang = (document.documentElement.getAttribute("lang") || "en_US").replace(
-            "-",
-            "_"
-        );
-
         if (!this.el.querySelector(".ol-viewport")) {
             const dataset = this.el.dataset;
             this.element = this.el;

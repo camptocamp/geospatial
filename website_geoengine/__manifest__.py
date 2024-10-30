@@ -3,7 +3,6 @@
 {
     "name": "Geospatial Website",
     "version": "16.0.1.0.0",
-    "description": "Create a method to search records getting only the ones that are 'is_published'",
     "category": "GeoBI",
     "author": "Camptocamp, Odoo Community Association (OCA)",
     "license": "AGPL-3",

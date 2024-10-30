@@ -1,8 +1,7 @@
 /** @odoo-module alias=website_geoengine_store_locator.openlayer_map */
 
-import Search from "./search";
 import Popover from "./popover";
-import ajax from "web.ajax";
+import Search from "./search";
 
 /**
  * The base class that manage all the map
@@ -44,8 +43,8 @@ class OpenLayerMap {
         });
 
         if (mapElement) {
-            new Popover(element.querySelector("#popup"), map);
-            new Search(
+            Popover(element.querySelector("#popup"), map);
+            Search(
                 element.querySelector("#search"),
                 map,
                 mapElement,
