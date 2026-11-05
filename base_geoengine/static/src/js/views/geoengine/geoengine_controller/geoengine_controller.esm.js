@@ -211,6 +211,7 @@ GeoengineController.template = "base_geoengine.GeoengineController";
 GeoengineController.components = {Layout, SearchBar};
 GeoengineController.props = {
     ...standardViewProps,
+    env: {type: Object, optional: true},
     Model: Function,
     Renderer: Function,
     archInfo: Object,
