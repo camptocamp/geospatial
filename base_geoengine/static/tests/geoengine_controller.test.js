@@ -2,10 +2,8 @@
 // License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import {Component, xml} from "@odoo/owl";
-import {describe, expect, test} from "@odoo/hoot";
-import {contains} from "@odoo/hoot-dom";
-import {MainComponentsContainer} from "@web/core/main_components_container";
 import {
+    contains,
     defineModels,
     fields,
     makeMockEnv,
@@ -15,6 +13,8 @@ import {
     onRpc,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
+import {describe, expect, test} from "@odoo/hoot";
+import {MainComponentsContainer} from "@web/core/main_components_container";
 import {geoengineView} from "@base_geoengine/js/views/geoengine/geoengine_view.esm";
 
 class GeoTest extends models.Model {
@@ -26,6 +26,7 @@ class GeoTest extends models.Model {
 }
 
 class OpenRecordRenderer extends Component {
+    static props = {openRecord: Function};
     static template = xml`
         <button class="o_test_open_record" t-on-click="openRecord">Open record</button>
     `;
