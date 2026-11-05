@@ -26,7 +26,7 @@ class GeoTest extends models.Model {
 }
 
 class OpenRecordRenderer extends Component {
-    static props = {openRecord: Function};
+    static props = ["*"];
     static template = xml`
         <button class="o_test_open_record" t-on-click="openRecord">Open record</button>
     `;
