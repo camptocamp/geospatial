@@ -60,10 +60,11 @@ test("editable GeoEngine view opens an editable form dialog and refreshes on clo
             "form,false": `<form><field name="name"/></form>`,
         },
     });
+    expect.verifySteps(["load records", "load records"]);
 
     await contains(".o_test_open_record").click();
     expect(".modal .o_form_view .o_field_widget[name='name'] input").toHaveCount(1);
 
     await contains(".modal .o_form_button_cancel").click();
-    expect.verifySteps(["load records", "load records"]);
+    expect.verifySteps(["load records"]);
 });
